@@ -25,7 +25,26 @@ const gamehandler = (() => {
             playerTwo.makeSelection(tileNumber);
         }
     }
-    return {changeTurn, turn, tileClicked};
+    function checkForWin() {
+        let winConditions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        for(i = 0; i < winConditions.length; i++) {
+            let xcount = 0;
+            let ocount = 0;
+            for(j = 0; j < winConditions[i].length; j++) {
+                if(gameboard.board[winConditions[i][j]] == 'X') {
+                    xcount++;
+                } else if(gameboard.board[winConditions[i][j]] == 'O') {
+                    ocount++;
+                }
+            }
+            if(xcount == 3) {
+                alert('x wins!');
+            } else if(ocount == 3) {
+                alert('o wins!');
+            }
+        }
+    }
+    return {changeTurn, turn, tileClicked, checkForWin};
 })();
 
 const gameboard = (() => {
@@ -57,9 +76,10 @@ const gameboard = (() => {
             board[tileNumber] = team;
             updateBoard();
             gamehandler.changeTurn();
+            gamehandler.checkForWin();
         }
     }
-    return {validateSelection};
+    return {validateSelection, board};
 })();
 
 const playerCreator = (team) => {
