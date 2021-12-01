@@ -1,7 +1,8 @@
 const gamehandler = (() => {
     let turn;
+    let winner = false;
     const turnText= document.querySelector('.turn-text');
-    (() => {
+    function randomizeTurn() {
         const decideTurn = Math.round(Math.random());
         if(decideTurn) {
             turn = 'X';
@@ -9,7 +10,8 @@ const gamehandler = (() => {
             turn = 'O';
         }
         turnText.textContent = `Turn: ${turn}`;
-    })();
+    };
+    randomizeTurn();
     function changeTurn() {
         if(turn == 'X') {
             turn = 'O';
@@ -26,7 +28,6 @@ const gamehandler = (() => {
         }
     }
     function checkForWin() {
-        let winner;
         let winConditions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
         for(i = 0; i < winConditions.length; i++) {
             let xcount = 0;
@@ -39,27 +40,42 @@ const gamehandler = (() => {
                 }
             }
             if(xcount == 3) {
-                winner = true;
+                gamehandler.winner = true;
                 gameEnd('x');
             } else if(ocount == 3) {
-                winner = true;
+                gamehandler.winner = true;
                 gameEnd('o');
             }
         }
-        if(gameboard.board.every(test => test) && !winner) {
+        if(gameboard.board.every(test => test) && !gamehandler.winner) {
             gameEnd('tie');
         }
     }
     function gameEnd(type) {
+        const endText = document.querySelector('.end-text');
         if(type == 'x') {
-            alert('x wins!');
+            endText.textContent = 'X is the winner!';
+            endText.style.color = 'green';
         } else if(type == 'o') {
-            alert('o wins');
+            endText.textContent = 'O is the winner!';
+            endText.style.color = 'green';
         } else if(type == 'tie') {
-            alert('tie!');
+            endText.textContent = 'The game was a tie.';
         }
+        const restartButton = document.createElement('button');
+        restartButton.textContent = 'Restart'
+        restartButton.classList.add('restart');
+        document.querySelector('.game-info').appendChild(restartButton);
+        restartButton.addEventListener('click', restartGame);
     }
-    return {changeTurn, turn, tileClicked, checkForWin};
+    function restartGame() {
+        gamehandler.winner = false;
+        gameboard.resetBoard();
+        randomizeTurn();
+        document.querySelector('.restart').remove();
+        document.querySelector('.end-text').textContent = '';
+    }
+    return {changeTurn, turn, tileClicked, checkForWin, winner};
 })();
 
 const gameboard = (() => {
@@ -74,6 +90,11 @@ const gameboard = (() => {
             const tileText = document.createElement('p');
             tileText.classList.add('tile-text');
             tileText.textContent = `${board[i]}`;
+            if(tileText.textContent == 'X') {
+                tileText.style.color = 'red';
+            } else if(tileText.textContent == 'O') {
+                tileText.style.color = 'green';
+            }
             boardTile.appendChild(tileText);
         }
         addButtonListeners();
@@ -87,14 +108,21 @@ const gameboard = (() => {
     }
     addButtonListeners();
     function validateSelection(tileNumber, team) {
-        if(!board[tileNumber]) {
+        if(!board[tileNumber] && !gamehandler.winner) {
             board[tileNumber] = team;
             updateBoard();
             gamehandler.changeTurn();
             gamehandler.checkForWin();
         }
     }
-    return {validateSelection, board};
+    function resetBoard() {
+        for(i = 0; i < board.length; i++) {
+            board[i] = '';
+        }
+        updateBoard();
+        addButtonListeners();
+    }
+    return {validateSelection, board, resetBoard};
 })();
 
 const playerCreator = (team) => {
