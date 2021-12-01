@@ -26,6 +26,7 @@ const gamehandler = (() => {
         }
     }
     function checkForWin() {
+        let winner;
         let winConditions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
         for(i = 0; i < winConditions.length; i++) {
             let xcount = 0;
@@ -38,10 +39,24 @@ const gamehandler = (() => {
                 }
             }
             if(xcount == 3) {
-                alert('x wins!');
+                winner = true;
+                gameEnd('x');
             } else if(ocount == 3) {
-                alert('o wins!');
+                winner = true;
+                gameEnd('o');
             }
+        }
+        if(gameboard.board.every(test => test) && !winner) {
+            gameEnd('tie');
+        }
+    }
+    function gameEnd(type) {
+        if(type == 'x') {
+            alert('x wins!');
+        } else if(type == 'o') {
+            alert('o wins');
+        } else if(type == 'tie') {
+            alert('tie!');
         }
     }
     return {changeTurn, turn, tileClicked, checkForWin};
