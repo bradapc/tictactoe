@@ -1,3 +1,33 @@
+const gamehandler = (() => {
+    let turn;
+    const turnText= document.querySelector('.turn-text');
+    (() => {
+        const decideTurn = Math.round(Math.random());
+        if(decideTurn) {
+            turn = 'X';
+        } else if(!decideTurn) {
+            turn = 'O';
+        }
+        turnText.textContent = `Turn: ${turn}`;
+    })();
+    function changeTurn() {
+        if(turn == 'X') {
+            turn = 'O';
+        } else if(turn == 'O') {
+            turn = 'X';
+        }
+        turnText.textContent = `Turn: ${turn}`;
+    }
+    function tileClicked(tileNumber) {
+        if(turn == 'X') {
+            playerOne.makeSelection(tileNumber);
+        } else if(turn == 'O') {
+            playerTwo.makeSelection(tileNumber);
+        }
+    }
+    return {changeTurn, turn, tileClicked};
+})();
+
 const gameboard = (() => {
     let board = ["", "", "", "", "", "", "", "", ""];
     function updateBoard() {
@@ -17,14 +47,16 @@ const gameboard = (() => {
     updateBoard();
     function addButtonListeners() {
         const boardTile = document.querySelectorAll('.tile');
-        boardTile.forEach(addClick => addClick.addEventListener('click', () => validateSelection(addClick.getAttribute('data-tile'))));
+        boardTile.forEach(addClick => addClick.addEventListener('click', () => {
+            gamehandler.tileClicked(addClick.getAttribute('data-tile'));
+        }));
     }
     addButtonListeners();
     function validateSelection(tileNumber, team) {
-        team = 'X';
         if(!board[tileNumber]) {
             board[tileNumber] = team;
             updateBoard();
+            gamehandler.changeTurn();
         }
     }
     return {validateSelection};
@@ -32,22 +64,11 @@ const gameboard = (() => {
 
 const playerCreator = (team) => {
     this.team = team;
-    return {team};
+    function makeSelection(tileNumber) {
+        gameboard.validateSelection(tileNumber, team);
+    }
+    return {team, makeSelection};
 }
 
-const gamehandler = (() => {
-    let turn;
-    (() => {
-        const decideTurn = Math.round(Math.random());
-        if(decideTurn) {
-            turn = 'X';
-        } else if(!decideTurn) {
-            turn = 'O';
-        }
-        alert(turn);
-    })();
-    function changeTurn() {
-
-    }
-    return {changeTurn};
-})();
+const playerOne = playerCreator('X');
+const playerTwo = playerCreator('O');
